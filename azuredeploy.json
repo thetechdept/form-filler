@@ -16,7 +16,7 @@
     "suffix": "[concat('-', parameters('environment'))]",
     "applicationInsightsName": "[concat('appi-', parameters('applicationName'), variables('suffix'))]",
     "hostingPlanName": "[concat('plan-', parameters('applicationName'), variables('suffix'))]",
-    "storageAccountName": "[replace(concat('st', substring(parameters('applicationName'), 0, 14), 'data', variables('suffix')), '-', '')]",
+    "storageAccountName": "[replace(concat('st', if(greater(length(parameters('applicationName')), 14), substring(parameters('applicationName'), 0, 14), parameters('applicationName')), 'data', variables('suffix')), '-', '')]",
     "functionAppName": "[concat('func-', parameters('applicationName'), variables('suffix'))]"
   },
   "resources": [
