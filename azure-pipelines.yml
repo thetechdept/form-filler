@@ -1,7 +1,7 @@
 name: $(Date:yyMM).$(DayOfMonth)$(Rev:.r)
 
 trigger:
-  - master
+  - main
 
 pool: Default
 
