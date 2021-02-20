@@ -55,6 +55,7 @@ stages:
           ApplicationName: tdformfiller
           Environment: qa
           ResourceGroupName: rg-$(ApplicationName)-$(Environment)
+          FunctionAppName: func-$(ApplicationName)-$(Environment)
 
         environment: qa
         strategy:
@@ -73,6 +74,7 @@ stages:
           ApplicationName: tdformfiller
           Environment: prod
           ResourceGroupName: rg-$(ApplicationName)-$(Environment)
+          FunctionAppName: func-$(ApplicationName)-$(Environment)
 
         environment: production
         strategy:

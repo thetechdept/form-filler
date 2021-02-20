@@ -17,4 +17,4 @@
       azureSubscription: $(AzureSubscription)
       appType: functionApp
       package: $(Pipeline.Workspace)/functions/functions.zip
-      appName: $(FunctionsAppName)
+      appName: $(FunctionAppName)
