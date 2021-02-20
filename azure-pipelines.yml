@@ -17,7 +17,9 @@ stages:
         displayName: Build Functions
         steps:
           - task: UseDotNet@2
-            displayName: Use .Net Core sdk
+            displayName: Use .Net Core SDK
+            inputs:
+              version: 5.x
 
           - task: DotNetCoreCLI@2
             displayName: dotnet test
