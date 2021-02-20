@@ -6,7 +6,7 @@ trigger:
 pool: Default
 
 variables:
-  AzureSubscription: thetechdept
+  AzureSubscription: TechDeptCloud
   buildConfiguration: Release
 
 stages:
