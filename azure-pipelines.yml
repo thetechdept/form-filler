@@ -1,0 +1,80 @@
+name: $(Date:yyMM).$(DayOfMonth)$(Rev:.r)
+
+trigger:
+  - master
+
+pool: Default
+
+variables:
+  AzureSubscription: thetechdept
+  buildConfiguration: Release
+
+stages:
+  - stage: build
+    displayName: Build
+    jobs:
+      - job: functions
+        displayName: Build Functions
+        steps:
+          - task: UseDotNet@2
+            displayName: Use .Net Core sdk
+
+          - task: DotNetCoreCLI@2
+            displayName: dotnet test
+            inputs:
+              command: test
+              projects: '**/*Tests/*.csproj'
+
+          - task: DotNetCoreCLI@2
+            displayName: dotnet publish
+            inputs:
+              command: publish
+              publishWebProjects: false
+              arguments: --configuration $(BuildConfiguration) -p:Version=$(Build.BuildNumber) --output $(build.artifactstagingdirectory)/functions
+              modifyOutputPath: false
+              projects: "*Functions/*.csproj"
+
+          - publish: $(build.artifactstagingdirectory)/functions
+            artifact: functions
+    
+      - job: deploy
+        displayName: Deploy Config
+        steps:
+          - publish: azuredeploy.json
+            artifact: deploy
+
+  - stage: qa
+    displayName: Deploy
+    dependsOn: build
+    jobs:
+      - deployment: qa
+        displayName: Deploy
+        variables:
+          ApplicationName: tdformfiller
+          Environment: qa
+          ResourceGroupName: rg-$(ApplicationName)-$(Environment)
+
+        environment: qa
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - template: azure-deployment-steps.yml
+
+  - stage: prod
+    displayName: Deploy
+    dependsOn: build
+    jobs:
+      - deployment: prod
+        displayName: Deploy
+        variables:
+          ApplicationName: tdformfiller
+          Environment: prod
+          ResourceGroupName: rg-$(ApplicationName)-$(Environment)
+
+        environment: production
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - template: azure-deployment-steps.yml

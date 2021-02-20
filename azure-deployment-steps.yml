@@ -1,0 +1,20 @@
+﻿steps:
+  - task: AzureResourceGroupDeployment@2
+    displayName: Deploy Resources
+    inputs:
+      azureSubscription: $(AzureSubscription)
+      resourceGroupName: $(ResourceGroupName)
+      location: UK South
+      csmFile: $(Pipeline.Workspace)/deploy/azuredeploy.json
+      deploymentName: $(ApplicationName)-$(Environment)
+      overrideParameters: >-
+        -applicationName $(ApplicationName)
+        -environment $(Environment)
+
+  - task: AzureFunctionApp@1
+    displayName: Deploy Functions
+    inputs:
+      azureSubscription: $(AzureSubscription)
+      appType: functionApp
+      package: $(Pipeline.Workspace)/functions/functions.zip
+      appName: $(FunctionsAppName)

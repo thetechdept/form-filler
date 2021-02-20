@@ -1,0 +1,25 @@
+{
+	"folders": [
+		{
+			"path": "Techdept.FormFiller.Api",
+			"name": "Api"
+		},
+		{
+			"path": "Techdept.FormFiller.UnitTests",
+			"name": "UnitTests"
+		},
+		{
+			"path": "Techdept.FormFiller.Core",
+			"name": "Core"
+		},
+		{
+			"path": "Techdept.FormFiller.Functions",
+			"name": "Functions"
+		}
+	],
+	"settings": {
+		"omnisharp.projects": [
+		   "FormFiller.sln"
+		]
+	}
+}
