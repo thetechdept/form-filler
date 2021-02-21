@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +9,7 @@ using Techdept.FormFiller.Core;
 namespace Techdept.FormFiller.Api.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class FormController : ControllerBase
     {
         private readonly ILogger<FormController> _logger;
@@ -20,23 +20,27 @@ namespace Techdept.FormFiller.Api.Controllers
             _formFiller = formFiller;
             _logger = logger;
         }
-        
+
         [HttpPost("Fields")]
-        public async Task<IActionResult> GetFields(IFormFile file)
+        public async Task<IActionResult> GetFields(IFormFile source)
         {
-            using var stream = file.OpenReadStream();
-            var fields = await _formFiller.GetFields(stream);
+            using var src = source.OpenReadStream();
+            var fields = await _formFiller.GetFields(src);
             return Ok(fields);
         }
 
         [HttpPost("Fill")]
-        public async Task<IActionResult> UpdateFields(IFormFile file, IDictionary<string, string> fields)
+        public async Task<FileResult> UpdateFields(IFormFile source)
         {
-            using var destination = new MemoryStream();
-            using var source = file.OpenReadStream();
+            var fields = Request.Form.ToDictionary(x => x.Key, x => x.Value.ToString());
 
-            await _formFiller.SetValues(source, destination, fields);
-            return File(destination, file.ContentType);
+            using var src = source.OpenReadStream();
+            var dest = new MemoryStream();
+
+            await _formFiller.SetValues(src, dest, fields);
+            dest.Position = 0;
+
+            return File(dest, source.ContentType);
         }
     }
 }

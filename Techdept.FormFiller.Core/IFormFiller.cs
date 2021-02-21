@@ -9,7 +9,6 @@ namespace Techdept.FormFiller.Core
         public FieldType Type { get; set; }
         public string Name { get; set; }
         public string Value { get; set; }
-
         public string[] Choices { get; set; }
     }
 
@@ -25,7 +24,6 @@ namespace Techdept.FormFiller.Core
     public interface IFormFiller
     {
         Task<IDictionary<string, FormField>> GetFields(Stream source);
-
         Task SetValues(Stream source, Stream destination, IDictionary<string, string> values);
     }
 }

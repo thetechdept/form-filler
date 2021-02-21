@@ -87,8 +87,8 @@
             }
           ],
           "http20Enabled": true,
-          "httpsOnly": true,
-          "minTlsVersion": "1.2"
+          "minTlsVersion": "1.2",
+          "httpsOnly": true
         }
       }
     },

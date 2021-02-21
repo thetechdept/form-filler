@@ -5,32 +5,39 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Techdept.FormFiller.Core;
+using System.IO;
+using System.Linq;
 
 namespace Techdept.FormFiller.Functions
 {
-    public class GetValues
+    public class SetValues
     {
         private readonly IFormFiller _formFiller;
 
         private readonly ILogger _log;
 
-        public GetValues(IFormFiller formFiller, ILogger<GetValues> log)
+        public SetValues(IFormFiller formFiller, ILogger<SetValues> log)
         {
             _formFiller = formFiller;
             _log = log;
         }
 
-        [FunctionName("GetValues")]
+        [FunctionName("SetValues")]
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Admin, "post")] HttpRequest req)
         {
-            var formdata = await req.ReadFormAsync();
-            var file = req.Form.Files["file"];
+            var source = req.Form.Files["source"];
 
-            using var source = file.OpenReadStream();
-            var fields = await _formFiller.GetFields(source);
+            var formdata = await req.ReadFormAsync();
+            var fields = formdata.ToDictionary(x => x.Key, x => x.Value.ToString());
+
+            using var src = source.OpenReadStream();
+            var dest = new MemoryStream();
+
+            await _formFiller.SetValues(src, dest, null);
+            dest.Position = 0;
             
-            return new JsonResult(fields, Defaults.JsonSerializerSettings);
+            return new FileStreamResult(dest, source.ContentType);
         }
     }
 }
