@@ -12,14 +12,14 @@ namespace Techdept.FormFiller.Functions
 {
     public class SetValues
     {
-        private readonly IFormFiller _formFiller;
+        private readonly IFormFiller formFiller;
 
-        private readonly ILogger _log;
+        private readonly ILogger logger;
 
-        public SetValues(IFormFiller formFiller, ILogger<SetValues> log)
+        public SetValues(IFormFiller formFiller, ILogger<SetValues> logger)
         {
-            _formFiller = formFiller;
-            _log = log;
+            this.formFiller = formFiller;
+            this.logger = logger;
         }
 
         [FunctionName("SetValues")]
@@ -34,7 +34,7 @@ namespace Techdept.FormFiller.Functions
             using var src = source.OpenReadStream();
             var dest = new MemoryStream();
 
-            await _formFiller.SetValues(src, dest, null);
+            await formFiller.SetValues(src, dest, fields);
             dest.Position = 0;
             
             return new FileStreamResult(dest, source.ContentType);

@@ -12,20 +12,20 @@ namespace Techdept.FormFiller.Api.Controllers
     [Route("api/[controller]")]
     public class FormController : ControllerBase
     {
-        private readonly ILogger<FormController> _logger;
-        private readonly IFormFiller _formFiller;
+        private readonly ILogger<FormController> logger;
+        private readonly IFormFiller formFiller;
 
         public FormController(ILogger<FormController> logger, IFormFiller formFiller)
         {
-            _formFiller = formFiller;
-            _logger = logger;
+            this.formFiller = formFiller;
+            this.logger = logger;
         }
 
         [HttpPost("Fields")]
         public async Task<IActionResult> GetFields(IFormFile source)
         {
             using var src = source.OpenReadStream();
-            var fields = await _formFiller.GetFields(src);
+            var fields = await formFiller.GetFields(src);
             return Ok(fields);
         }
 
@@ -37,7 +37,7 @@ namespace Techdept.FormFiller.Api.Controllers
             using var src = source.OpenReadStream();
             var dest = new MemoryStream();
 
-            await _formFiller.SetValues(src, dest, fields);
+            await formFiller.SetValues(src, dest, fields);
             dest.Position = 0;
 
             return File(dest, source.ContentType);

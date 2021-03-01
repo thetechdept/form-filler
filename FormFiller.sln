@@ -11,6 +11,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Techdept.FormFiller.Core", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Techdept.FormFiller.Functions", "Techdept.FormFiller.Functions\Techdept.FormFiller.Functions.csproj", "{72F27E99-7018-4D1E-8084-7DF3E1F33E6D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{80E37100-D730-47F9-B11E-6BD064D92A6A}"
+	ProjectSection(SolutionItems) = preProject
+		azure-deployment-steps.yml = azure-deployment-steps.yml
+		azure-pipelines.yml = azure-pipelines.yml
+		azuredeploy.json = azuredeploy.json
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

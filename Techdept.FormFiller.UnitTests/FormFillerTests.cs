@@ -9,11 +9,11 @@ namespace Techdept.FormFiller.IntegrationTests
 {
     public class FormFillerTests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly ITestOutputHelper output;
 
         public FormFillerTests(ITestOutputHelper output)
         {
-            _output = output;
+            this.output = output;
         }
 
         [Fact]
@@ -49,7 +49,7 @@ namespace Techdept.FormFiller.IntegrationTests
             const string key = "Text Field";
             destination.Position = 0;
             var fields = await service.GetFields(destination);        
-            //_output.WriteLine(string.Join(", ", fields.Select(x => $"{x.Key}:{x.Value.Value}").ToArray()));
+            // output.WriteLine(string.Join(", ", fields.Select(x => $"{x.Key}:{x.Value.Value}").ToArray()));
             Assert.Contains(key, fields);
             Assert.Equal(values[key], fields[key].Value);
         }
