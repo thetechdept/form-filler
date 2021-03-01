@@ -24,7 +24,6 @@ namespace Techdept.FormFiller.Functions
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Admin, "post")] HttpRequest req)
         {
-            var formdata = await req.ReadFormAsync();
             var file = req.Form.Files["source"];
 
             using var source = file.OpenReadStream();

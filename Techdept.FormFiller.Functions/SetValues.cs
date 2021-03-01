@@ -27,9 +27,7 @@ namespace Techdept.FormFiller.Functions
             [HttpTrigger(AuthorizationLevel.Admin, "post")] HttpRequest req)
         {
             var source = req.Form.Files["source"];
-
-            var formdata = await req.ReadFormAsync();
-            var fields = formdata.ToDictionary(x => x.Key, x => x.Value.ToString());
+            var fields = req.Form.ToDictionary(x => x.Key, x => x.Value.ToString());
 
             using var src = source.OpenReadStream();
             var dest = new MemoryStream();
