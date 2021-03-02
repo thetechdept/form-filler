@@ -78,7 +78,13 @@ namespace Techdept.FormFiller.Core
                 .Where(f => f.Field != null)
                 .ToList();
 
-            fields.ForEach(f => f.Field.SetValue(f.Value));
+            fields.ForEach(f =>
+            {
+                f.Field.SetValue(f.Value);
+                form.PartialFormFlattening(f.Key);
+            });
+
+            form.FlattenFields();
 
             doc.SetCloseWriter(false);
             doc.SetCloseReader(false);

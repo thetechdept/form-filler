@@ -48,10 +48,8 @@ namespace Techdept.FormFiller.IntegrationTests
             // Assert
             const string key = "Text Field";
             destination.Position = 0;
-            var fields = await service.GetFields(destination);        
-            // output.WriteLine(string.Join(", ", fields.Select(x => $"{x.Key}:{x.Value.Value}").ToArray()));
-            Assert.Contains(key, fields);
-            Assert.Equal(values[key], fields[key].Value);
+            var fields = await service.GetFields(destination);                        
+            Assert.DoesNotContain(key, fields);
         }
 
     }
