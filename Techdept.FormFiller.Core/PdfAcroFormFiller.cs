@@ -41,39 +41,16 @@ namespace Techdept.FormFiller.Core
                 return FieldType.Unknown;
             }
 
-            FormFieldPosition? GetFieldPosition(PdfFormField field, PdfDocument doc)
-            {
-                var firstWidget = field.GetWidgets().FirstOrDefault();
-
-                if (firstWidget == null)
-                {
-                    return null;
-                }
-                var bounds = firstWidget.GetRectangle();
-                var page = doc.GetPageNumber(firstWidget.GetPage());
-                var rectangle = Rectangle.CreateBoundingRectangleFromQuadPoint(bounds);
-                return new FormFieldPosition
-                {
-                    Top = (int)Math.Round(rectangle.GetTop()),
-                    Left = (int)Math.Round(rectangle.GetLeft()),
-                    Width = (int)Math.Round(rectangle.GetWidth()),
-                    Height = (int)Math.Round(rectangle.GetHeight()),
-                    Page = page
-                };
-            }
-
             var dictionary = fields.ToDictionary(x => x.Key, x =>
             {
                 var field = x.Value;
                 var type = GetFieldType(field);
-                var position = GetFieldPosition(field, doc);
 
                 return new FormField
                 {
                     Name = x.Key,
                     Type = type,
-                    Value = field.GetValueAsString(),
-                    Position = position
+                    Value = field.GetValueAsString()
                 };
             });
 

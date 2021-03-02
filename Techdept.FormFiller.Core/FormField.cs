@@ -8,6 +8,5 @@ namespace Techdept.FormFiller.Core
         public string Name { get; set; } = string.Empty;
         public string Value { get; set; } = string.Empty;
         public ICollection<string> Choices { get; set; } = new List<string>();
-        public FormFieldPosition? Position { get; set; }
     }
 }
