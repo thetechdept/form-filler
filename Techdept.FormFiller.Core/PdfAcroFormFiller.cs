@@ -19,9 +19,6 @@ namespace Techdept.FormFiller.Core
             var form = PdfAcroForm.GetAcroForm(doc, false);
             var fields = form.GetFormFields();
 
-            doc.SetCloseReader(false);
-            doc.Close();
-
             FieldType GetFieldType(PdfFormField field)
             {
                 var pdfName = field.GetFormType();
@@ -79,6 +76,9 @@ namespace Techdept.FormFiller.Core
                     Position = position
                 };
             });
+
+            doc.SetCloseReader(false);
+            doc.Close();
 
             return Task.FromResult(dictionary as IDictionary<string, FormField>);
         }
