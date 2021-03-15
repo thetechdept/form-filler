@@ -1,11 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using iText.Forms;
 using iText.Forms.Fields;
-using iText.Kernel.Geom;
 using iText.Kernel.Pdf;
 
 namespace Techdept.FormFiller.Core
@@ -17,7 +15,8 @@ namespace Techdept.FormFiller.Core
             var reader = new PdfReader(source);
             var doc = new PdfDocument(reader);
             var form = PdfAcroForm.GetAcroForm(doc, false);
-            var fields = form.GetFormFields();
+
+            var fields = form?.GetFormFields() ?? new Dictionary<string, PdfFormField>();
 
             FieldType GetFieldType(PdfFormField field)
             {
@@ -60,7 +59,7 @@ namespace Techdept.FormFiller.Core
             return Task.FromResult(dictionary as IDictionary<string, FormField>);
         }
 
-        public Task SetValues(Stream source, Stream destination, IDictionary<string, string> values)
+        public Task SetValues(Stream source, Stream destination, IDictionary<string, string> values, FlattenMode flattenMode = FlattenMode.None)
         {
             var reader = new PdfReader(source);
             var writer = new PdfWriter(destination);
@@ -78,13 +77,26 @@ namespace Techdept.FormFiller.Core
                 .Where(f => f.Field != null)
                 .ToList();
 
-            fields.ForEach(f =>
-            {
-                f.Field.SetValue(f.Value);
-                form.PartialFormFlattening(f.Key);
-            });
 
-            form.FlattenFields();
+            fields.ForEach(f => f.Field.SetValue(f.Value));
+
+            if (flattenMode != FlattenMode.None)
+            {
+                var partialFlattenFields = new List<string>();
+                switch (flattenMode)
+                {
+                    case FlattenMode.Filled:
+                        partialFlattenFields.AddRange(fields.Select(x => x.Key));
+                        break;
+                    case FlattenMode.ExcludeSignature:
+                        partialFlattenFields.AddRange(form.GetFormFields().Where(field => field.Value.GetFormType() != PdfName.Sig).Select(x => x.Key));
+                        break;
+                }
+
+                partialFlattenFields.ForEach(k => form.PartialFormFlattening(k));
+
+                form.FlattenFields();
+            }
 
             doc.SetCloseWriter(false);
             doc.SetCloseReader(false);

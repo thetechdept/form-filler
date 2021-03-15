@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -34,10 +35,13 @@ namespace Techdept.FormFiller.Api.Controllers
         {
             var fields = Request.Form.ToDictionary(x => x.Key, x => x.Value.ToString());
 
+            Request.Form.TryGetValue("flattenMode", out var flattenModes);
+            Enum.TryParse<FlattenMode>(flattenModes.FirstOrDefault(), true, out var flattenMode);
+
             using var src = source.OpenReadStream();
             var dest = new MemoryStream();
 
-            await formFiller.SetValues(src, dest, fields);
+            await formFiller.SetValues(src, dest, fields, flattenMode);
             dest.Position = 0;
 
             return File(dest, source.ContentType);

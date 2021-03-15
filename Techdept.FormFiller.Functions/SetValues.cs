@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Techdept.FormFiller.Core;
 using System.IO;
 using System.Linq;
+using System;
 
 namespace Techdept.FormFiller.Functions
 {
@@ -28,11 +29,14 @@ namespace Techdept.FormFiller.Functions
         {
             var source = req.Form.Files["source"];
             var fields = req.Form.ToDictionary(x => x.Key, x => x.Value.ToString());
+            
+            req.Form.TryGetValue("flattenMode", out var flattenModes);
+            Enum.TryParse<FlattenMode>(flattenModes.FirstOrDefault(), true, out var flattenMode);
 
             using var src = source.OpenReadStream();
             var dest = new MemoryStream();
 
-            await formFiller.SetValues(src, dest, fields);
+            await formFiller.SetValues(src, dest, fields, flattenMode);
             dest.Position = 0;
             
             return new FileStreamResult(dest, source.ContentType);

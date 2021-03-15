@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Xunit.Abstractions;
 
-namespace Techdept.FormFiller.IntegrationTests
+namespace Techdept.FormFiller.UnitTests
 {
     public class FormFillerTests
     {
@@ -52,5 +52,71 @@ namespace Techdept.FormFiller.IntegrationTests
             Assert.DoesNotContain(key, fields);
         }
 
+        [Fact]
+        public async Task FlattenModeAll()
+        {
+            // Arrange
+            var service = new PdfAcroFormFiller();
+            using var source = File.OpenRead("./Resources/Test Form.pdf");
+            using var destination = new MemoryStream();
+
+            // Act
+            var values = new Dictionary<string, string>()
+            {
+                ["Text Field"] = "Test"
+            };
+            await service.SetValues(source, destination, values, FlattenMode.All);
+
+            // Assert
+            destination.Position = 0;
+            var fields = await service.GetFields(destination);                        
+            Assert.DoesNotContain("Text Field", fields);
+            Assert.DoesNotContain("Digital Signature", fields);
+        }
+
+        [Fact]
+        public async Task FlattenModeFilled()
+        {
+            // Arrange
+            var service = new PdfAcroFormFiller();
+            using var source = File.OpenRead("./Resources/Test Form.pdf");
+            using var destination = new MemoryStream();
+
+            // Act
+            var values = new Dictionary<string, string>()
+            {
+                ["Text Field"] = "Test"
+            };
+            await service.SetValues(source, destination, values, FlattenMode.Filled);
+
+            // Assert
+            destination.Position = 0;
+            var fields = await service.GetFields(destination);
+            Assert.DoesNotContain("Text Field", fields);
+            Assert.Contains("Check Box 1", fields);
+        }
+        
+        [Fact]
+        public async Task FlattenModeExcludeSignature()
+        {
+            // Arrange
+            var service = new PdfAcroFormFiller();
+            using var source = File.OpenRead("./Resources/Test Form.pdf");
+            using var destination = new MemoryStream();
+
+            // Act
+            var values = new Dictionary<string, string>()
+            {
+                ["Text Field"] = "Test"
+            };
+            await service.SetValues(source, destination, values, FlattenMode.ExcludeSignature);
+
+            // Assert
+            destination.Position = 0;
+            var fields = await service.GetFields(destination);
+            Assert.DoesNotContain("Text Field", fields);
+            Assert.DoesNotContain("Check Box 1", fields);
+            Assert.Contains("Digital Signature", fields);
+        }
     }
 }
