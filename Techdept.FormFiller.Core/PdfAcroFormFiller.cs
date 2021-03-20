@@ -6,19 +6,11 @@ using System.Threading.Tasks;
 using iText.Forms;
 using iText.Forms.Fields;
 using iText.Kernel.Pdf;
-using Microsoft.Extensions.Logging;
 
 namespace Techdept.FormFiller.Core
 {
     public class PdfAcroFormFiller : IFormFiller
     {
-        private readonly ILogger logger;
-
-        public PdfAcroFormFiller(ILogger<PdfAcroFormFiller> logger)
-        {
-            this.logger = logger;
-        }
-
         public Task<IDictionary<string, FormField>> GetFields(Stream source)
         {
             var reader = new PdfReader(source);
@@ -101,9 +93,10 @@ namespace Techdept.FormFiller.Core
                 {
                     f.Field.SetValue(f.Value);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    this.logger.LogError(ex, $"Error setting value - {f.Key}:{f.Value}");
+                    // TODO: log
+                    // this.logger.LogError(ex, $"Error setting value - {f.Key}:{f.Value}");
                 }
             });
 
