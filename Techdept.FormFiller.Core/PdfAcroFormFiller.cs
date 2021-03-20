@@ -73,8 +73,16 @@ namespace Techdept.FormFiller.Core
             var reader = new PdfReader(source);
             var writer = new PdfWriter(destination);
             var doc = new PdfDocument(reader, writer);
+            doc.SetCloseWriter(false);
+            doc.SetCloseReader(false);
 
             var form = PdfAcroForm.GetAcroForm(doc, false);
+
+            if (form == null)
+            {
+                doc.Close();
+                return Task.CompletedTask;
+            }
 
             var fields = values
                 .Select(x => new
@@ -117,8 +125,6 @@ namespace Techdept.FormFiller.Core
                 form.FlattenFields();
             }
 
-            doc.SetCloseWriter(false);
-            doc.SetCloseReader(false);
             doc.Close();
 
             return Task.CompletedTask;
