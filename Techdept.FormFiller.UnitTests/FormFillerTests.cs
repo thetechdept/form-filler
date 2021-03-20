@@ -4,12 +4,15 @@ using Techdept.FormFiller.Core;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Xunit.Abstractions;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging;
 
 namespace Techdept.FormFiller.UnitTests
 {
     public class FormFillerTests
     {
         private readonly ITestOutputHelper output;
+        private readonly ILogger<PdfAcroFormFiller> logger = new NullLogger<PdfAcroFormFiller>();
 
         public FormFillerTests(ITestOutputHelper output)
         {
@@ -20,7 +23,7 @@ namespace Techdept.FormFiller.UnitTests
         public async Task GetFields()
         {
             // Arrange
-            var service = new PdfAcroFormFiller();
+            var service = new PdfAcroFormFiller(logger);
             using var source = File.OpenRead("./Resources/Test Form.pdf");
 
             // Act
@@ -34,14 +37,22 @@ namespace Techdept.FormFiller.UnitTests
         public async Task FillFields()
         {
             // Arrange
-            var service = new PdfAcroFormFiller();
+            var service = new PdfAcroFormFiller(logger);
             using var source = File.OpenRead("./Resources/Test Form.pdf");
             using var destination = new MemoryStream();
 
             // Act
             var values = new Dictionary<string, string>()
             {
-                ["Text Field"] = "Test"
+                ["Check Box 1"] = "Name",
+                ["Check Box 2"] = "Name",
+                ["Radio Group.1"] = "Name",
+                ["Radio Group.2"] = "Name",
+                ["Choice 3"] = "Name",
+                ["Button"] = "Name",
+                ["Text Field"] = "Name",
+                ["Date Field"] = "Name",
+                ["Dropdown"] = "Name"
             };
             await service.SetValues(source, destination, values);
 
@@ -49,14 +60,14 @@ namespace Techdept.FormFiller.UnitTests
             const string key = "Text Field";
             destination.Position = 0;
             var fields = await service.GetFields(destination);                        
-            Assert.DoesNotContain(key, fields);
+            Assert.Contains(key, fields);
         }
 
         [Fact]
         public async Task FlattenModeAll()
         {
             // Arrange
-            var service = new PdfAcroFormFiller();
+            var service = new PdfAcroFormFiller(logger);
             using var source = File.OpenRead("./Resources/Test Form.pdf");
             using var destination = new MemoryStream();
 
@@ -78,7 +89,7 @@ namespace Techdept.FormFiller.UnitTests
         public async Task FlattenModeFilled()
         {
             // Arrange
-            var service = new PdfAcroFormFiller();
+            var service = new PdfAcroFormFiller(logger);
             using var source = File.OpenRead("./Resources/Test Form.pdf");
             using var destination = new MemoryStream();
 
@@ -100,7 +111,7 @@ namespace Techdept.FormFiller.UnitTests
         public async Task FlattenModeExcludeSignature()
         {
             // Arrange
-            var service = new PdfAcroFormFiller();
+            var service = new PdfAcroFormFiller(logger);
             using var source = File.OpenRead("./Resources/Test Form.pdf");
             using var destination = new MemoryStream();
 
