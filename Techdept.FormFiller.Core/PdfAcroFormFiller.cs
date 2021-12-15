@@ -86,11 +86,13 @@ namespace Techdept.FormFiller.Core
                 .Where(f => f.Field != null)
                 .ToList();
 
-
             fields.ForEach(f =>
             {
                 try
                 {
+                    var states = f.Field.GetAppearanceStates();
+                    var state = states.FirstOrDefault(state => f.Value == state);
+
                     f.Field.SetValue(f.Value);
                 }
                 catch (Exception)
