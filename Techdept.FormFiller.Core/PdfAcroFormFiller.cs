@@ -91,9 +91,15 @@ namespace Techdept.FormFiller.Core
                 try
                 {
                     var states = f.Field.GetAppearanceStates();
-                    var state = states.FirstOrDefault(state => f.Value == state);
-
-                    f.Field.SetValue(f.Value);
+                    if (states.Length > 1)
+                    {
+                        var state = states.FirstOrDefault(state => f.Value.Equals(state, StringComparison.InvariantCultureIgnoreCase));
+                        f.Field.SetValue(state ?? states.First());
+                    }
+                    else
+                    {
+                        f.Field.SetValue(f.Value);
+                    }
                 }
                 catch (Exception)
                 {
