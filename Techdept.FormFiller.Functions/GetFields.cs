@@ -26,6 +26,11 @@ namespace Techdept.FormFiller.Functions
         {
             var file = req.Form.Files["source"];
 
+            if (file == null)
+            {
+                return new BadRequestObjectResult(new { Message = "Source file is required" });
+            }
+
             using var source = file.OpenReadStream();
             var fields = await _formFiller.GetFields(source);
             
