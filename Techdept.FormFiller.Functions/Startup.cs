@@ -11,7 +11,9 @@ namespace Techdept.FormFiller.Functions
         {
             var config = builder.GetContext().Configuration;
 
-            builder.Services.AddTransient<IFormFiller, PdfAcroFormFiller>();
+            builder.Services
+                .AddTransient<IFormFiller, PdfAcroFormFiller>()
+                .AddTransient<IDocumentSigner, DocumentSigner>();
         }
     }
 }
