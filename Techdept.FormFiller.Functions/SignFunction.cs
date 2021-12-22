@@ -26,30 +26,30 @@ namespace Techdept.FormFiller.Functions
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Admin, "post")] HttpRequest req)
         {
-            var sourceFile = req.Form.Files["source"];
-            if (sourceFile == null)
+            var documentFile = req.Form.Files["document"];
+            if (documentFile == null)
             {
-                return new BadRequestObjectResult(new { Message = "Source file is required" });
+                return new BadRequestObjectResult(new { Message = "Document is required" });
             }
+            var contentType = documentFile.ContentType;
 
             var certificateFile = req.Form.Files["certificate"];
             if (certificateFile == null)
             {
-                return new BadRequestObjectResult(new { Message = "Certificate file is required" });
+                return new BadRequestObjectResult(new { Message = "Certificate is required" });
             }
-            using var fileStream = certificateFile.OpenReadStream();
+            using var certificateStream = certificateFile.OpenReadStream();
             var certificateBytes = new byte[certificateFile.Length];        
-            fileStream.Read(certificateBytes, 0, (int)certificateFile.Length);
+            certificateStream.Read(certificateBytes, 0, (int)certificateFile.Length);
             var certificate = new X509Certificate2(certificateBytes);
 
+            req.Form.TryGetValue("signatureField", out var signatureField);
 
-            using var src = sourceFile.OpenReadStream();
+            using var source = documentFile.OpenReadStream();
             var dest = new MemoryStream();
-
-            await _documentSigner.Sign(src, dest, certificate);
-            dest.Position = 0;
-
-            return new FileStreamResult(dest, sourceFile.ContentType);
+            await _documentSigner.Sign(source, dest, certificate, null, signatureField);
+            
+            return new FileContentResult(dest.ToArray(), contentType);
         }
     }
 }
