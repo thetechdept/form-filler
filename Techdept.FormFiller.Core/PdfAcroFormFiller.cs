@@ -1,11 +1,14 @@
+using iText.Forms;
+using iText.Forms.Fields;
+using iText.IO.Image;
+using iText.Kernel.Pdf;
+using iText.Layout;
+using iText.Layout.Element;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using iText.Forms;
-using iText.Forms.Fields;
-using iText.Kernel.Pdf;
 
 namespace Techdept.FormFiller.Core
 {
@@ -22,22 +25,26 @@ namespace Techdept.FormFiller.Core
             FieldType GetFieldType(PdfFormField field)
             {
                 var pdfName = field.GetFormType();
-                if (pdfName == PdfName.Btn)
+                if (Equals(pdfName, PdfName.Btn))
                 {
                     return FieldType.Radiobutton;
                 }
-                else if (pdfName == PdfName.Ch)
+
+                if (Equals(pdfName, PdfName.Ch))
                 {
                     return FieldType.Checkbox;
                 }
-                else if (pdfName == PdfName.Sig)
+
+                if (Equals(pdfName, PdfName.Sig))
                 {
                     return FieldType.Signature;
                 }
-                else if (pdfName == PdfName.Tx)
+
+                if (Equals(pdfName, PdfName.Tx))
                 {
                     return FieldType.Text;
                 }
+
                 return FieldType.Unknown;
             }
 
@@ -67,6 +74,7 @@ namespace Techdept.FormFiller.Core
             var doc = new PdfDocument(reader, writer);
             doc.SetCloseWriter(false);
             doc.SetCloseReader(false);
+            var document = new Document(doc);
 
             var form = PdfAcroForm.GetAcroForm(doc, false);
 
@@ -79,9 +87,9 @@ namespace Techdept.FormFiller.Core
             var fields = values
                 .Select(x => new
                 {
-                    Key = x.Key,
+                    x.Key,
                     Field = form.GetField(x.Key),
-                    Value = x.Value
+                    x.Value
                 })
                 .Where(f => f.Field != null)
                 .ToList();
@@ -98,7 +106,43 @@ namespace Techdept.FormFiller.Core
                     }
                     else
                     {
-                        f.Field.SetValue(f.Value);
+                        if (f.Field is PdfButtonFormField pdfButtonFormField)
+                        {
+                            if (pdfButtonFormField.IsPushButton())
+                            {
+                                pdfButtonFormField.SetValue(f.Value);
+                                pdfButtonFormField.SetReadOnly(true);
+                            }
+                        }
+
+                        if (f.Key.EndsWith("_af_image"))
+                        {
+                            var bytes = Convert.FromBase64String(f.Value);
+                            var imageData = ImageDataFactory.Create(bytes);
+                            var rectangle = f.Field.GetPdfObject().GetAsRectangle(PdfName.Rect);
+                            var image = new Image(imageData);
+
+                            // best-fit image to form field
+                            var rWidth = rectangle.GetWidth();
+                            var rHeight = rectangle.GetHeight();
+
+                            if (Math.Abs(image.GetImageWidth() - rWidth) > 0 || Math.Abs(image.GetImageHeight() - rHeight) > 0)
+                            {
+                                image = image.ScaleToFit(rWidth, rHeight);
+                            }
+
+                            var rLeft = Math.Round(rectangle.GetLeft());
+                            var rBottom = Math.Round(rectangle.GetBottom());
+                            image.SetFixedPosition((float)rLeft, (float)rBottom);
+
+                            document.Add(image);
+
+                            form.RemoveField(f.Key);
+                        }
+                        else
+                        {
+                            f.Field.SetValue(f.Value);
+                        }
                     }
                 }
                 catch (Exception)
@@ -116,6 +160,7 @@ namespace Techdept.FormFiller.Core
                     case FlattenMode.Filled:
                         partialFlattenFields.AddRange(fields.Select(x => x.Key));
                         break;
+
                     case FlattenMode.ExcludeSignature:
                         partialFlattenFields.AddRange(form.GetFormFields().Where(field => field.Value.GetFormType() != PdfName.Sig).Select(x => x.Key));
                         break;
@@ -126,6 +171,7 @@ namespace Techdept.FormFiller.Core
                 form.FlattenFields();
             }
 
+            document.Close();
             doc.Close();
 
             return Task.CompletedTask;

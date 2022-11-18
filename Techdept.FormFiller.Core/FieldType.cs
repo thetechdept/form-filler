@@ -6,6 +6,7 @@ namespace Techdept.FormFiller.Core
         Checkbox,
         Radiobutton,
         Signature,
+        Button,
         Unknown
     }
 }
