@@ -51,10 +51,6 @@ namespace Techdept.FormFiller.UnitTests
             destination.Position = 0;
             var fields = await service.GetFields(destination);
             Assert.Contains(key, fields);
-
-            destination.Position = 0;
-            var w = File.OpenWrite("F:/result.pdf");
-            await w.WriteAsync(destination.ToArray());
         }
 
         [Fact]
