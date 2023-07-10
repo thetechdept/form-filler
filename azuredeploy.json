@@ -8,12 +8,13 @@
     "environment": {
       "type": "string",
       "defaultValue": "dev",
-      "allowedValues": [ "dev", "qa", "uat", "prod" ]
+      "allowedValues": ["dev", "qa", "uat", "prod"]
     }
   },
   "variables": {
     "location": "[resourceGroup().location]",
     "suffix": "[concat('-', parameters('environment'))]",
+    "logAnalyticsWorkspaceName": "[concat('log-', parameters('applicationName'), variables('suffix'))]",
     "applicationInsightsName": "[concat('appi-', parameters('applicationName'), variables('suffix'))]",
     "hostingPlanName": "[concat('plan-', parameters('applicationName'), variables('suffix'))]",
     "storageAccountName": "[replace(concat('st', if(greater(length(parameters('applicationName')), 14), substring(parameters('applicationName'), 0, 14), parameters('applicationName')), 'data', variables('suffix')), '-', '')]",
@@ -93,6 +94,17 @@
       }
     },
     {
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2022-10-01",
+      "name": "[variables('logAnalyticsWorkspaceName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "sku": {
+          "name": "PerGB2018"
+        }
+      }
+    },
+    {
       "type": "microsoft.insights/components",
       "apiVersion": "2020-02-02-preview",
       "name": "[variables('applicationInsightsName')]",
@@ -102,8 +114,12 @@
       },
       "properties": {
         "ApplicationId": "[variables('applicationInsightsName')]",
-        "Request_Source": "IbizaWebAppExtensionCreate"
-      }
+        "Request_Source": "IbizaWebAppExtensionCreate",
+        "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsWorkspaceName'))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsWorkspaceName'))]"
+      ]
     }
   ]
 }
